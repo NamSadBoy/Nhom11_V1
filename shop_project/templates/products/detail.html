@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'images/no_image.png' %}{% endif %}" 
+             class="img-fluid rounded shadow-sm" alt="{{ product.name }}">
+        </div>
+    
+    <div class="col-md-6">
+        <h1>{{ product.name }}</h1>
+        <p class="text-muted">{{ product.category.name }}</p>
+        
+        <h2 class="text-danger fw-bold my-4">{{ product.price|floatformat:0 }} VNĐ</h2>
+        
+        <form action="{% url 'cart:cart_add' product.id %}" method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="variant-select" class="form-label fw-bold">Chọn Kích cỡ / Màu sắc:</label>
+                <select name="variant_id" id="variant-select" class="form-select" required>
+                    <option value="" disabled selected>Chọn một biến thể</option>
+                    {% for variant in variants %}
+                    <option value="{{ variant.id }}">
+                        {{ variant.size }} ({{ variant.color }}) - Tồn kho: {{ variant.stock }}
+                    </option>
+                    {% empty %}
+                    <option value="" disabled>Hiện không có biến thể nào</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="quantity-input" class="form-label fw-bold">Số lượng:</label>
+                <input type="number" name="quantity" id="quantity-input" class="form-control" value="1" min="1" max="10" style="width: 100px;">
+            </div>
+            
+            {% if product.variants.all %}
+                <button type="submit" class="btn btn-lg btn-success w-100 mt-3">
+                    <i class="bi bi-cart-plus-fill"></i> Thêm vào Giỏ hàng
+                </button>
+            {% else %}
+                <button type="button" class="btn btn-lg btn-secondary w-100 mt-3" disabled>Hết hàng</button>
+            {% endif %}
+            
+        </form>
+
+        <h4 class="mt-5">Mô tả sản phẩm</h4>
+        <p>{{ product.description|linebreaks }}</p>
+    </div>
+</div>
+{% endblock %}
